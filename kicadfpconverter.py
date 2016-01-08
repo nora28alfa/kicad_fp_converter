@@ -10,7 +10,9 @@ oldfilename ="pin_array.mod"
 
 # the file of .kicad_mod is made in this folder
 #ofs = open( folderpath +"/"+filename+".kicad_mod","w")
-# where filename is given by $MODULE filename
+# where filename is given by "$MODULE filename" in Legacy format
+# folder is made or prepared before execute
+#
 
 folderpath ="lib"
 
