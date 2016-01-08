@@ -246,7 +246,7 @@ class KiCadFootprintPad:
 	def set_contents(self, items):
 		if items[0]=="Sh":
 			if items[1]=="\"\"":
-				self.name ="NOCONN"
+				self.name ="NC"
 			else:
 				self.name=items[1]
 				self.name = self.name.lstrip("\"")
@@ -288,8 +288,8 @@ class KiCadFootprintPad:
 				self.mask = "layers *.Cu *.Mask F.SilkS"
 			elif items[3]=="00888000":
 				self.mask = "layers F.Cu F.Paste F.Mask"
-			elif items[3]=="00F0FFFF":
-				self.mask = "layers *.Cu *.Mask F.SilkS"
+#			elif items[3]=="00F0FFFF":
+#				self.mask = "layers *.Cu *.Mask F.SilkS"
 		elif items[0]=="Po":
 			self.x = items[1]
 			self.y = items[2]
