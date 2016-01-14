@@ -16,11 +16,12 @@ And create the "S-Expression libraries".
 "oldfilename" is the filename of Legacy format.
 
 "folder" is the relative folder path.
-you have to prepare the folder before execute
 
-"resize" is the option.
 
-"def SMD" should be 1 if the modules in library are all SMD module.
+line 23 - 59 are options that works if the value is not "0"
+
+
+"DEF_SMD" should be 1 if the modules in library are all SMD module.
 
 The sample creat the S-Expression libraries from pinarray.mod (Ver bzr4022) is in "lib" folder.
 
