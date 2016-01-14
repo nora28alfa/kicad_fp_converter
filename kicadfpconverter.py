@@ -6,7 +6,7 @@ import time
 #ifs = open(oldfilename,"r")
 #
 
-oldfilename ="pin_array.mod"
+oldfilename ="discret.mod"
 
 # the file of .kicad_mod is made in this folder
 #ofs = open( folderpath +"/"+filename+".kicad_mod","w")
@@ -16,16 +16,43 @@ oldfilename ="pin_array.mod"
 
 folderpath ="lib"
 
-# if resize ==1
-# font size is (1, 1), thickness is 0.15
-# line width is 0.15
+# 
+# font size is (TEXTFONT_W, TEXTFONT_H), thickness is TEXTFONT_T
+# if the value equal to "0", this definition is ignored
 #
-resize = 1
+G_TEXTFONT_W = "1"
+G_TEXTFONT_H = "1"
+G_TEXTFONT_T = "0.15"
 
-# if defSMD ==1
+#
+# line width is LINE_WIDTH (including circle and arc)
+# if the value equal to "0", this definition is ignored
+#
+G_LINE_WIDTH = "0.15"
+
+#
+# PAD_TYPE (C,R,O,T)
+#
+G_PAD_TYPE = "0"
+G_PAD_WIDTH = "0"
+G_PAD_HEIGHT = "0"
+
+#
+# DRL_TYPE ("round","oval")
+# if round DRL_WIDTH and DRL_HEIGHT is ignored
+# if oval DRL_SIZE is ignored and DRL_WIDTH is used 
+#
+G_DRL_TYPE = "0"
+G_DRL_SIZE = "0"
+G_DRL_WIDTH = "0"
+G_DRL_HEIGHT = "0"
+
+
+
+# if DEF_SMD ==1
 # (attr SMD) 
 #
-defSMD = 0
+DEF_SMD = 0
 
 
 #
@@ -59,11 +86,7 @@ class KiCadFootprintHeader:
 		self.layer = "F.Cu"
 		self.name = "undefined"
 		self.tedit = hex(int(time.time()))
-		
-		if defSMD==1:
-			self.type = "SMD"
-		else:
-			self.type = "undefined"
+		self.type = "undefined"
 		self.description = "undefined"
 		self.keywords = "undefined"
 		
@@ -97,6 +120,9 @@ class KiCadFootprintHeader:
 		return self.name
 
 	def get_new_format(self):
+		if DEF_SMD==1:
+			self.type = "SMD"
+
 		linelist=["(module %s (layer %s) (tedit %s)" %(self.name , self.layer , self.tedit)]
 		
 		if self.type !="undefined":
@@ -133,14 +159,9 @@ class KiCadFootprintFpText:
 			self.text = self.text.rstrip("\"")
 		self.x= items[1]
 		self.y= items[2]
-		if resize==1:
-			self.textheight = "1"
-			self.textwidth = "1"
-			self.textthickness = "0.15"
-		else:
-			self.textheight = items[3]
-			self.textwidth = items[4]
-			self.textthickness = items[6]
+		self.textheight = items[3]
+		self.textwidth = items[4]
+		self.textthickness = items[6]
 		self.a = items[5]
 		self.visible = items[8]
 		if items[9]=="21":
@@ -150,6 +171,12 @@ class KiCadFootprintFpText:
 		#	self.layer= "F.SilkS"
 
 	def get_new_format(self):
+		if G_TEXTFONT_W !="0":
+			self.textwidth = G_TEXTFONT_W
+		if G_TEXTFONT_H !="0":
+			self.textheight = G_TEXTFONT_H
+		if G_TEXTFONT_T !="0":
+			self.textthickness = G_TEXTFONT_T
 		
 		str = "  (fp_text %s %s " % (self.type, self.text)
 		if self.a=="0":
@@ -179,21 +206,24 @@ class KiCadFootprintFpLine:
 		self.starty= items[2]
 		self.endx= items[3]
 		self.endy= items[4]
-		if resize ==1:
-			self.width ="0.15"
-		else:
-			self.width =items[5]
+		self.width =items[5]
 		if items[6]=="21":
 			self.layer="F.SilkS"
 		else:
 			self.layer="F.SilkS"
 
 	def get_new_format(self):
+		if G_LINE_WIDTH !="0":
+			self.width = G_LINE_WIDTH
+
 		linelist=["  (fp_line (start %s %s) (end %s %s) (layer %s) (width %s))" %(self.startx, self.starty, self.endx, self.endy, self.layer, self.width)]
 		return linelist
 
 class KiCadFootprintFpCircle(KiCadFootprintFpLine):
 	def get_new_format(self):
+		if G_LINE_WIDTH !="0":
+			self.width = G_LINE_WIDTH
+
 		linelist=["  (fp_circle (center %s %s) (end %s %s) (layer %s) (width %s))" %(self.startx, self.starty, self.endx, self.endy, self.layer, self.width)]
 		return linelist
 
@@ -208,16 +238,17 @@ class KiCadFootprintFpArc(KiCadFootprintFpLine):
 		self.endx= items[3]
 		self.endy= items[4]
 		self.angle =items[5]
-		if resize ==1:
-			self.width ="0.15"
-		else:
-			self.width =items[6]
+		self.width =items[6]
+
 		if items[7]=="21":
 			self.layer="F.SilkS"
 		else:
 			self.layer="F.SilkS"
 
 	def get_new_format(self):
+		if G_LINE_WIDTH !="0":
+			self.width = G_LINE_WIDTH
+
 		linelist=["  (fp_arc (start %s %s) (end %s %s) (angle %s) (layer %s) (width %s))" %(self.startx, self.starty, self.endx, self.endy, self.angle,self.layer, self.width)]
 		return linelist
 
@@ -245,8 +276,8 @@ class KiCadFootprintPad:
 	
 	def set_contents(self, items):
 		if items[0]=="Sh":
-			if items[1]=="\"\"":
-				self.name ="NC"
+			if items[1]=='""':
+				self.name ='""'
 			else:
 				self.name=items[1]
 				self.name = self.name.lstrip("\"")
@@ -288,13 +319,34 @@ class KiCadFootprintPad:
 				self.mask = "layers *.Cu *.Mask F.SilkS"
 			elif items[3]=="00888000":
 				self.mask = "layers F.Cu F.Paste F.Mask"
-#			elif items[3]=="00F0FFFF":
-#				self.mask = "layers *.Cu *.Mask F.SilkS"
 		elif items[0]=="Po":
 			self.x = items[1]
 			self.y = items[2]
 
 	def get_new_format(self):
+		if G_PAD_TYPE=="C":
+			self.shape="circle"
+		elif G_PAD_TYPE=="R":
+			self.shape="rect"
+		elif G_PAD_TYPE=="O":
+			self.shape="oval"
+		elif G_PAD_TYPE=="T":
+			self.shape="trapezoid"
+
+		if G_PAD_WIDTH != "0":
+			self.width = G_PAD_WIDTH
+		if G_PAD_HEIGHT != "0":
+			self.height = G_PAD_HEIGHT
+
+		if G_DRL_TYPE == "oval":
+			self.drtype="oval"
+			self.drw = G_DRL_WIDTH
+			self.drh = G_DRL_HEIGHT
+			
+		elif G_DRL_TYPE == "round":
+			self.drtype ="round"
+			self.drsize = G_DRL_SIZE
+			
 		str = "  (pad %s %s %s " % (self.name, self.type, self.shape)
 		if self.orientation=="0": 
 			str += "(at %s %s)" % (self.x, self.y)
@@ -449,12 +501,20 @@ def make_new_format(ifs):
 if __name__=="__main__":
 
 	ifs = open(oldfilename,"r")
-
+	ofs2 = open("suspicious_file.txt","w")
+	
 	for line in ifs:
+		suspicious_flag = 0
 		items = line.split()
 		if items[0]=="$MODULE":
 			ofs = open( folderpath +"/"+items[1]+".kicad_mod","w")
+			
 			outputlist=make_new_format(ifs)
 			for line in outputlist:
+				if "undefined" in line:
+					suspicious_flag = 1
 				ofs.write(line +"\n")
 			ofs.close()
+			if suspicious_flag == 1:
+				ofs2.write(items[1]+".kicad_mod\n")
+			
