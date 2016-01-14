@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 
 import time
+import os
 
 # filename of .mod
 #ifs = open(oldfilename,"r")
 #
 
-oldfilename ="discret.mod"
+oldfilename ="pin_array.mod"
 
 # the file of .kicad_mod is made in this folder
 #ofs = open( folderpath +"/"+filename+".kicad_mod","w")
 # where filename is given by "$MODULE filename" in Legacy format
-# folder is made or prepared before execute
+#
 #
 
-folderpath ="lib"
+foldername = oldfilename.split(".")
+folderpath =foldername[0]+".pretty"
+if not os.path.isdir(folderpath):
+	os.mkdir(folderpath)
 
 # 
 # font size is (TEXTFONT_W, TEXTFONT_H), thickness is TEXTFONT_T
@@ -308,17 +312,21 @@ class KiCadFootprintPad:
 		elif items[0]=="At":
 			if items[1]=="STD":
 				self.type = "thru_hole"
+				self.mask = "layers *.Cu *.Mask F.SilkS"
 			elif items[1]=="SMD":
 				self.type = "smd"
+				self.mask = "layers F.Cu F.Paste F.Mask"
 			elif items[1]=="CONN":
 				self.type = "connect"
+				self.mask = "layers *.Cu *.Mask F.SilkS"
 			elif items[1]=="HOLE":
 				self.type = "np_thru_hole"
-			
-			if items[3]=="00E0FFFF":
 				self.mask = "layers *.Cu *.Mask F.SilkS"
-			elif items[3]=="00888000":
-				self.mask = "layers F.Cu F.Paste F.Mask"
+			
+#			if items[3]=="00E0FFFF":
+#				self.mask = "layers *.Cu *.Mask F.SilkS"
+#			elif items[3]=="00888000":
+#				self.mask = "layers F.Cu F.Paste F.Mask"
 		elif items[0]=="Po":
 			self.x = items[1]
 			self.y = items[2]
